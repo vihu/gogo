@@ -22,3 +22,21 @@ pub fn list(db: &DB) {
     table.printstd();
 
 }
+
+pub fn remove(db: &DB, key: &str) {
+    match db.get(key) {
+        Ok(None) => println!("{}", "key does not exist".yellow()),
+        Ok(_) => {
+            match db.delete(key) {
+                Ok(()) => {
+                    println!("{} removed", key.green());
+                    println!("{}", "Updated list".purple().bold());
+                    list(db)
+                }
+                Err(_) => println!("{}", "Unable to remove key".red().bold())
+            }
+        },
+        Err(_) => println!("{}", "Unable to remove key".red().bold())
+    }
+
+}

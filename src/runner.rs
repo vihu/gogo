@@ -15,6 +15,7 @@ fn match_subcommand(db: &DB, matches: ArgMatches) {
         Some(("open", open_matches)) => handle_open(db, open_matches),
         Some(("add", add_matches)) => handle_add(db, add_matches),
         Some(("list", _)) => handle_list(db),
+        Some(("rm", rm_matches)) => handle_rm(db, rm_matches),
         None => println!("No command was used"),
         _ => unreachable!(),
     }
@@ -28,6 +29,14 @@ fn matches() -> ArgMatches {
             App::new("open").about("Open url using mnemonic").arg(
                 Arg::new("open")
                     .about("The url to open")
+                    .takes_value(true)
+                    .required(true),
+            ),
+        )
+        .subcommand(
+            App::new("rm").about("Remove mnemonic").arg(
+                Arg::new("rm")
+                    .about("The mnemonic to remove")
                     .takes_value(true)
                     .required(true),
             ),
@@ -98,4 +107,9 @@ fn handle_add(db: &DB, add_matches: &ArgMatches) {
 
 fn handle_list(database: &DB) {
     db::list(database)
+}
+
+fn handle_rm(db: &DB, rm_matches: &ArgMatches) {
+    let rm_val = rm_matches.value_of("rm").unwrap();
+    db::remove(db, rm_val);
 }
