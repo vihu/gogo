@@ -7,7 +7,6 @@ fn main() {
     let matches = App::new("gogo")
         .about("A mnemonic url opener")
         .version("1.0")
-        .author("Rahul Garg")
         .subcommand(
             App::new("open")
                 .about("opens mnemonic url")
