@@ -1,6 +1,6 @@
 [package]
 name = "gogo"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2018"
 description = "A mnemonic terminal url opener"

@@ -18,6 +18,8 @@ $ cargo install gogo
 - Add `GOGODB_PATH=/path/to/gogo.db` to your bashrc/zshrc.
 - `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
 
+Some example commands you can try:
+
 ```
 $ gogo add github https://github.com
 $ gogo add hn https://news.ycombinator.com/
@@ -26,6 +28,7 @@ $ gogo open github
 $ gogo open hn
 $ gogo open reddit
 $ gogo list
+$ gogo rm hn
 ```
 
 #### Help
