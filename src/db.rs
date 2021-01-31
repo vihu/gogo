@@ -1,5 +1,5 @@
-use sled;
+use rocksdb::DB;
 
-pub fn open(val: &str) -> sled::Db {
-    sled::open(val).expect("open")
+pub fn open(path: &str) -> DB {
+    DB::open_default(path).unwrap()
 }

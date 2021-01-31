@@ -1,12 +1,13 @@
 use clap::{App, Arg, ArgMatches};
-use sled;
+use rocksdb::DB;
+use url::Url;
 
-pub fn run(db: sled::Db) {
+pub fn run(db: DB) {
     let matches = matches();
     match_subcommand(db, matches)
 }
 
-fn match_subcommand(db: sled::Db, matches: ArgMatches) {
+fn match_subcommand(db: DB, matches: ArgMatches) {
     match matches.subcommand() {
         Some(("open", open_matches)) => handle_open(db, open_matches),
         Some(("add", add_matches)) => handle_add(db, add_matches),
@@ -42,31 +43,32 @@ fn insert_help(name: &str, value: &str) {
     println!("Inserting {:?} for url: {:?}", name, value)
 }
 
-fn upsert_help(prev: sled::IVec, new: &str, value: &str) {
-    println!("Changing {:?} to {:?} for url: {:?}", prev, new, value)
-}
-
-fn handle_open(db: sled::Db, open_matches: &ArgMatches) {
-    println!("Opening {}", open_matches.value_of("open").unwrap());
+fn handle_open(db: DB, open_matches: &ArgMatches) {
     let open_val = open_matches.value_of("open").unwrap();
 
     match db.get(&open_val) {
-        Ok(Some(url)) => println!("{:?} -> {:?}", open_val, url),
+        Ok(Some(url)) => {
+            println!("{:?} maps to {:?}, opening firefox...", open_val, String::from_utf8(url).unwrap())
+        }
         Ok(None) => open_help(),
         Err(_) => open_help(),
     }
 }
 
-fn handle_add(db: sled::Db, add_matches: &ArgMatches) {
+fn handle_add(db: DB, add_matches: &ArgMatches) {
     println!("name {}", add_matches.value_of("name").unwrap());
     println!("val {}", add_matches.value_of("val").unwrap());
 
     let name = add_matches.value_of("name").unwrap();
     let value = add_matches.value_of("val").unwrap();
 
-    match db.insert(name, value) {
-        Ok(None) => insert_help(name, value),
-        Ok(Some(previous)) => upsert_help(previous, name, value),
-        Err(_) => insert_help(name, value)
+    match Url::parse(value) {
+        Ok(_url) => {
+            match db.put(name, value) {
+                Ok(_) => insert_help(name, value),
+                Err(_) => insert_help(name, value)
+            }
+        }
+        _ => println!("{:?} is not a valid url", value)
     }
 }

@@ -8,7 +8,7 @@ fn main() {
 
     let db = match dotenv::var(key) {
         Ok(value) => db::open(value.as_str()),
-        Err(_) => db::open("/tmp/gogo")
+        Err(_) => db::open("/tmp/gogo.db")
     };
 
     runner::run(db)
