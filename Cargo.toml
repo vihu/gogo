@@ -1,5 +1,5 @@
 [package]
-name = "opener"
+name = "gogo"
 version = "0.1.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2018"

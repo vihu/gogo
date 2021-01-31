@@ -56,6 +56,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "gogo"
+version = "0.1.0"
+dependencies = [
+ "clap",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -100,13 +107,6 @@ name = "libc"
 version = "0.2.84"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cca32fa0182e8c0989459524dc356b8f2b5c10f1b9eb521b7d182c03cf8c5ff"
-
-[[package]]
-name = "opener"
-version = "0.1.0"
-dependencies = [
- "clap",
-]
 
 [[package]]
 name = "os_str_bytes"
