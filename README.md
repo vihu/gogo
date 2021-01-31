@@ -15,7 +15,7 @@ $ cargo install gogo
 
 #### Usage
 
-- Add `GOGODB_PATH` to your bashrc/zshrc.
+- Add `GOGODB_PATH=/path/to/gogo.db` to your bashrc/zshrc.
 - `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
 
 ```
