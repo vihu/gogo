@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 clap = "3.0.0-beta.2"
+dotenv = "0.15.0"
+rocksdb = "0.15.0"
+url = "2.2.0"
