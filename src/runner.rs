@@ -1,4 +1,5 @@
 use clap::{App, Arg, ArgMatches};
+use std::process::Command;
 use rocksdb::DB;
 use url::Url;
 
@@ -48,7 +49,12 @@ fn handle_open(db: DB, open_matches: &ArgMatches) {
 
     match db.get(&open_val) {
         Ok(Some(url)) => {
-            println!("{:?} maps to {:?}, opening firefox...", open_val, String::from_utf8(url).unwrap())
+            let actual_url = String::from_utf8(url).unwrap();
+            println!("{:?} maps to {:?}, opening firefox...", open_val, actual_url);
+            Command::new("firefox")
+                .arg(actual_url)
+                .spawn()
+                .expect("Firefox blew up");
         }
         Ok(None) => open_help(),
         Err(_) => open_help(),
