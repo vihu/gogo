@@ -1,16 +1,17 @@
 mod db;
 mod runner;
+use std::env;
 
 fn main() {
-    dotenv::from_filename(".env").ok();
+    let key = "GOGODB_PATH";
 
-    let key = "GOGODB";
-
-    let db = match dotenv::var(key) {
+    let db = match env::var(key) {
         Ok(value) => db::open(value.as_str()),
-        Err(_) => db::open("/tmp/gogo.db")
+        Err(_) => {
+            println!("Using tmp path for gogo db, please set env var in your shell rc file!");
+            db::open("/tmp/gogo.db")
+        }
     };
 
     runner::run(db)
 }
-

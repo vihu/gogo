@@ -1,6 +1,6 @@
 [package]
 name = "gogo"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2018"
 description = "A mnemonic terminal url opener"
@@ -14,6 +14,5 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = "3.0.0-beta.2"
-dotenv = "0.15.0"
 rocksdb = "0.15.0"
 url = "2.2.0"

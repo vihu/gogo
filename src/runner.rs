@@ -1,6 +1,6 @@
 use clap::{App, Arg, ArgMatches};
-use std::process::Command;
 use rocksdb::DB;
+use std::process::Command;
 use url::Url;
 
 pub fn run(db: DB) {
@@ -22,15 +22,28 @@ fn matches() -> ArgMatches {
         .about("A mnemonic url opener")
         .version("1.0")
         .subcommand(
-            App::new("open")
-                .about("opens mnemonic url")
-                .arg(Arg::new("open").about("The url to open").takes_value(true).required(true)),
+            App::new("open").about("opens mnemonic url").arg(
+                Arg::new("open")
+                    .about("The url to open")
+                    .takes_value(true)
+                    .required(true),
+            ),
         )
         .subcommand(
             App::new("add")
                 .about("add url")
-                .arg(Arg::new("name").about("url name").takes_value(true).required(true))
-                .arg(Arg::new("val").about("url value").takes_value(true).required(true))
+                .arg(
+                    Arg::new("name")
+                        .about("url name")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("val")
+                        .about("url value")
+                        .takes_value(true)
+                        .required(true),
+                ),
         )
         .get_matches()
 }
@@ -50,7 +63,10 @@ fn handle_open(db: DB, open_matches: &ArgMatches) {
     match db.get(&open_val) {
         Ok(Some(url)) => {
             let actual_url = String::from_utf8(url).unwrap();
-            println!("{:?} maps to {:?}, opening firefox...", open_val, actual_url);
+            println!(
+                "{:?} maps to {:?}, opening firefox...",
+                open_val, actual_url
+            );
             Command::new("firefox")
                 .arg(actual_url)
                 .spawn()
@@ -69,12 +85,10 @@ fn handle_add(db: DB, add_matches: &ArgMatches) {
     let value = add_matches.value_of("val").unwrap();
 
     match Url::parse(value) {
-        Ok(_url) => {
-            match db.put(name, value) {
-                Ok(_) => insert_help(name, value),
-                Err(_) => insert_help(name, value)
-            }
-        }
-        _ => println!("{:?} is not a valid url", value)
+        Ok(_url) => match db.put(name, value) {
+            Ok(_) => insert_help(name, value),
+            Err(_) => insert_help(name, value),
+        },
+        _ => println!("{:?} is not a valid url", value),
     }
 }
