@@ -2,6 +2,12 @@
 
 A mnemonic terminal url opener.
 
+#### Installation
+
+```
+$ cargo install gogo
+```
+
 #### Usage
 
 ```
