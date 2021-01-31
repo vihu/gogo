@@ -24,17 +24,17 @@ fn matches() -> ArgMatches {
         .about("A mnemonic url opener")
         .version("1.0")
         .subcommand(
-            App::new("open").about("opens mnemonic url").arg(
+            App::new("open").about("Open url using mnemonic").arg(
                 Arg::new("open")
                     .about("The url to open")
                     .takes_value(true)
                     .required(true),
             ),
         )
-        .subcommand(App::new("list").about("list mnemonic url mapping"))
+        .subcommand(App::new("list").about("List mnemonic url mapping"))
         .subcommand(
             App::new("add")
-                .about("add url")
+                .about("Add url mnemonic mapping")
                 .arg(
                     Arg::new("name")
                         .about("url name")

@@ -25,6 +25,7 @@ $ gogo add reddit https://old.reddit.com
 $ gogo open github
 $ gogo open hn
 $ gogo open reddit
+$ gogo list
 ```
 
 #### Help
