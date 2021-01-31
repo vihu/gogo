@@ -15,7 +15,7 @@ $ cargo install gogo
 
 #### Usage
 
-- Move `.envsample` to `.env` and edit path for database.
+- Add `GOGODB_PATH` to your bashrc/zshrc.
 - `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
 
 ```

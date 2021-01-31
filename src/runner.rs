@@ -2,6 +2,7 @@ use clap::{App, Arg, ArgMatches};
 use rocksdb::DB;
 use std::process::Command;
 use url::Url;
+use crate::db;
 
 pub fn run(db: DB) {
     let matches = matches();
@@ -12,6 +13,7 @@ fn match_subcommand(db: DB, matches: ArgMatches) {
     match matches.subcommand() {
         Some(("open", open_matches)) => handle_open(db, open_matches),
         Some(("add", add_matches)) => handle_add(db, add_matches),
+        Some(("list", _)) => handle_list(db),
         None => println!("No command was used"),
         _ => unreachable!(),
     }
@@ -29,6 +31,7 @@ fn matches() -> ArgMatches {
                     .required(true),
             ),
         )
+        .subcommand(App::new("list").about("list mnemonic url mapping"))
         .subcommand(
             App::new("add")
                 .about("add url")
@@ -91,4 +94,8 @@ fn handle_add(db: DB, add_matches: &ArgMatches) {
         },
         _ => println!("{:?} is not a valid url", value),
     }
+}
+
+fn handle_list(database: DB) {
+    db::list(database)
 }
