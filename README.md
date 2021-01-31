@@ -9,8 +9,6 @@ A mnemonic terminal url opener.
 
 #### Installation
 
-## WIP
-
 ```
 $ cargo install gogo
 ```
