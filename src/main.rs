@@ -13,5 +13,5 @@ fn main() {
         }
     };
 
-    runner::run(db)
+    runner::run(&db)
 }

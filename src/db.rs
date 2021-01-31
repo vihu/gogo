@@ -4,7 +4,7 @@ pub fn open(path: &str) -> DB {
     DB::open_default(path).unwrap()
 }
 
-pub fn list(db: DB) {
+pub fn list(db: &DB) {
     let iter = db.iterator(IteratorMode::Start);
 
     for (key, value) in iter {
