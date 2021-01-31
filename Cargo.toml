@@ -1,10 +1,11 @@
 [package]
 name = "gogo"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2018"
 description = "A mnemonic terminal url opener"
 homepage = "https://github.com/vihu/gogo"
+repository = "https://github.com/vihu/gogo"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["cli"]
