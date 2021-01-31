@@ -2,7 +2,21 @@ use clap::{App, Arg, ArgMatches};
 use sled;
 
 pub fn run(db: sled::Db) {
-    let matches = App::new("gogo")
+    let matches = matches();
+    match_subcommand(db, matches)
+}
+
+fn match_subcommand(db: sled::Db, matches: ArgMatches) {
+    match matches.subcommand() {
+        Some(("open", open_matches)) => handle_open(db, open_matches),
+        Some(("add", add_matches)) => handle_add(db, add_matches),
+        None => println!("No command was used"),
+        _ => unreachable!(),
+    }
+}
+
+fn matches() -> ArgMatches {
+    App::new("gogo")
         .about("A mnemonic url opener")
         .version("1.0")
         .subcommand(
@@ -16,15 +30,7 @@ pub fn run(db: sled::Db) {
                 .arg(Arg::new("name").about("url name").takes_value(true).required(true))
                 .arg(Arg::new("val").about("url value").takes_value(true).required(true))
         )
-        .get_matches();
-
-    match matches.subcommand() {
-        Some(("open", open_matches)) => handle_open(db, open_matches),
-        Some(("add", add_matches)) => handle_add(db, add_matches),
-        None => println!("No command was used"),
-        _ => unreachable!(),
-    }
-
+        .get_matches()
 }
 
 fn open_help() {
