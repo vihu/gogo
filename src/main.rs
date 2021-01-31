@@ -2,8 +2,10 @@
 // gogo add mygit "github.com/vihu"
 
 use clap::{App, Arg};
+use dotenv::dotenv;
+use std::env;
 
-fn main() {
+fn run() {
     let matches = App::new("gogo")
         .about("A mnemonic url opener")
         .version("1.0")
@@ -39,6 +41,15 @@ fn main() {
         _ => unreachable!(), // If all subcommands are defined above, anything else is unreachabe!()
     }
 
-    // Continued program logic goes here...
+}
+
+fn main() {
+    dotenv().ok();
+
+    for (key, value) in env::vars() {
+        println!("{}: {}", key, value);
+    }
+
+    run()
 }
 
