@@ -2,7 +2,14 @@
 
 A mnemonic terminal url opener.
 
+#### Requirments
+
+- Install [rust](https://www.rust-lang.org/tools/install).
+- Install [firefox](https://www.mozilla.org/en-US/firefox/new/).
+
 #### Installation
+
+## WIP
 
 ```
 $ cargo install gogo
@@ -10,9 +17,16 @@ $ cargo install gogo
 
 #### Usage
 
+- Move `.envsample` to `.env` and edit path for database.
+- `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
+
 ```
-$ gogo add github "github.com"
+$ gogo add github https://github.com
+$ gogo add hn https://news.ycombinator.com/
+$ gogo add reddit https://old.reddit.com
 $ gogo open github
+$ gogo open hn
+$ gogo open reddit
 ```
 
 #### Help
