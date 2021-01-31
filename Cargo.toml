@@ -16,3 +16,5 @@ categories = ["command-line-utilities"]
 clap = "3.0.0-beta.2"
 rocksdb = "0.15.0"
 url = "2.2.0"
+colored = "2.0.0"
+prettytable-rs = "^0.8"

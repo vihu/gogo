@@ -3,6 +3,7 @@ use rocksdb::DB;
 use std::process::Command;
 use url::Url;
 use crate::db;
+use colored::*;
 
 pub fn run(db: &DB) {
     let matches = matches();
@@ -52,12 +53,12 @@ fn matches() -> ArgMatches {
 }
 
 fn open_help() {
-    println!("No match found, please use add command first!");
-    println!("gogo add name actual_url")
+    println!("{}", "No match found, please use add command first!".red().bold());
+    println!("{}", "gogo add name actual_url".yellow().bold())
 }
 
 fn insert_help(name: &str, value: &str) {
-    println!("Inserting {:?} for url: {:?}", name, value)
+    println!("Inserting {} for url: {}", name.green(), value.green())
 }
 
 fn handle_open(db: &DB, open_matches: &ArgMatches) {
@@ -67,8 +68,8 @@ fn handle_open(db: &DB, open_matches: &ArgMatches) {
         Ok(Some(url)) => {
             let actual_url = String::from_utf8(url).unwrap();
             println!(
-                "{:?} maps to {:?}, opening firefox...",
-                open_val, actual_url
+                "{} maps to {}, opening firefox...",
+                open_val.green(), actual_url.green()
             );
             Command::new("firefox")
                 .arg(actual_url)
@@ -81,18 +82,17 @@ fn handle_open(db: &DB, open_matches: &ArgMatches) {
 }
 
 fn handle_add(db: &DB, add_matches: &ArgMatches) {
-    println!("name {}", add_matches.value_of("name").unwrap());
-    println!("val {}", add_matches.value_of("val").unwrap());
-
     let name = add_matches.value_of("name").unwrap();
     let value = add_matches.value_of("val").unwrap();
 
     match Url::parse(value) {
-        Ok(_url) => match db.put(name, value) {
-            Ok(_) => insert_help(name, value),
-            Err(_) => insert_help(name, value),
+        Ok(_url) => {
+            match db.put(name, value) {
+                Ok(_) => insert_help(name, value),
+                Err(_) => insert_help(name, value),
+            }
         },
-        _ => println!("{:?} is not a valid url", value),
+        _ => println!("{} is not a valid url", value.red().bold()),
     }
 }
 
