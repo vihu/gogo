@@ -2,7 +2,7 @@ use clap::{App, Arg, ArgMatches};
 use rocksdb::DB;
 use std::process::Command;
 use url::Url;
-use crate::db;
+use crate::{BROWSER_KEY, db};
 use colored::*;
 
 pub fn run(db: &DB) {
@@ -14,6 +14,8 @@ fn match_subcommand(db: &DB, matches: ArgMatches) {
     match matches.subcommand() {
         Some(("open", open_matches)) => handle_open(db, open_matches),
         Some(("add", add_matches)) => handle_add(db, add_matches),
+        Some(("set_browser", set_matches)) => handle_set(db, set_matches),
+        Some(("get_browser", _)) => handle_get(db),
         Some(("list", _)) => handle_list(db),
         Some(("rm", rm_matches)) => handle_rm(db, rm_matches),
         None => println!("No command was used"),
@@ -34,6 +36,14 @@ fn matches() -> ArgMatches {
             ),
         )
         .subcommand(
+            App::new("set_browser").about("Allow setting preferred browser").arg(
+                Arg::new("browser")
+                    .about("The browser to set")
+                    .takes_value(true)
+                    .required(true),
+            ),
+        )
+        .subcommand(
             App::new("rm").about("Remove mnemonic").arg(
                 Arg::new("rm")
                     .about("The mnemonic to remove")
@@ -42,6 +52,7 @@ fn matches() -> ArgMatches {
             ),
         )
         .subcommand(App::new("list").about("List mnemonic url mapping"))
+        .subcommand(App::new("get_browser").about("Get currently configured browser"))
         .subcommand(
             App::new("add")
                 .about("Add url mnemonic mapping")
@@ -66,27 +77,26 @@ fn open_help() {
     println!("{}", "gogo add name actual_url".yellow().bold())
 }
 
-fn insert_help(name: &str, value: &str) {
-    println!("Inserting {} for url: {}", name.green(), value.green())
-}
-
 fn handle_open(db: &DB, open_matches: &ArgMatches) {
     let open_val = open_matches.value_of("open").unwrap();
 
-    match db.get(&open_val) {
-        Ok(Some(url)) => {
-            let actual_url = String::from_utf8(url).unwrap();
-            println!(
-                "{} maps to {}, opening firefox...",
-                open_val.green(), actual_url.green()
-            );
-            Command::new("firefox")
-                .arg(actual_url)
-                .spawn()
-                .expect("Firefox blew up");
+    match db::get_url_from_mnemonic(db, open_val) {
+        Some(actual_url) => {
+            match db::get_browser(db) {
+                Some(actual_browser) => {
+                    println!(
+                        "{} maps to {}, opening {}...",
+                        open_val.green(), actual_url.green(),  actual_browser.green()
+                    );
+                    Command::new(actual_browser)
+                        .arg(actual_url)
+                        .spawn()
+                        .expect("Firefox blew up");
+                }
+                None => open_help()
+            }
         }
-        Ok(None) => open_help(),
-        Err(_) => open_help(),
+        None => open_help()
     }
 }
 
@@ -95,21 +105,25 @@ fn handle_add(db: &DB, add_matches: &ArgMatches) {
     let value = add_matches.value_of("val").unwrap();
 
     match Url::parse(value) {
-        Ok(_url) => {
-            match db.put(name, value) {
-                Ok(_) => insert_help(name, value),
-                Err(_) => insert_help(name, value),
-            }
-        },
+        Ok(_url) => db::insert(db, name, value),
         _ => println!("{} is not a valid url", value.red().bold()),
     }
 }
 
 fn handle_list(database: &DB) {
-    db::list(database)
+    db::list_mnemonics(database)
 }
 
 fn handle_rm(db: &DB, rm_matches: &ArgMatches) {
     let rm_val = rm_matches.value_of("rm").unwrap();
     db::remove(db, rm_val);
+}
+
+fn handle_set(db: &DB, set_matches: &ArgMatches) {
+    let set_val = set_matches.value_of("browser").unwrap();
+    db::insert(db, BROWSER_KEY, set_val);
+}
+
+fn handle_get(database: &DB) {
+    db::get_browser(database).unwrap();
 }

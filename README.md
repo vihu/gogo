@@ -1,11 +1,14 @@
 #### gogo
 
-A mnemonic terminal url opener.
+A mnemonic terminal url opener. Also a personal minimal terminal bookmark manager.
+
+- Will use firefox as the default browser for opening links.
+- You can use `gogo set_browser other_browser` to change preferred browser (assuming you have other_browser  available somewhere in your path of course).
+- Backs up your bookmarks to a self contained directory which you can configure by setting `GOGODB_PATH` env variable.
 
 #### Requirments
 
-- Install [rust](https://www.rust-lang.org/tools/install).
-- Install [firefox](https://www.mozilla.org/en-US/firefox/new/).
+- Install [rust](https://www.rust-lang.org/tools/install) (tested with 1.46+).
 
 #### Installation
 
@@ -29,6 +32,8 @@ $ gogo open hn
 $ gogo open reddit
 $ gogo list
 $ gogo rm hn
+$ gogo set_browser librewolf
+$ gogo get_browser
 ```
 
 #### Help
@@ -46,31 +51,21 @@ FLAGS:
     -V, --version    Prints version information
 
 SUBCOMMANDS:
-    add     add url
-    help    Prints this message or the help of the given subcommand(s)
-    open    opens mnemonic url
+    add            Add url mnemonic mapping
+    get_browser    Get currently configured browser
+    help           Prints this message or the help of the given subcommand(s)
+    list           List mnemonic url mapping
+    open           Open url using mnemonic
+    rm             Remove mnemonic
+    set_browser    Allow setting preferred browser
 ```
 
-```
-$ gogo open --help
-gogo-open 
-opens mnemonic url
-
-USAGE:
-    gogo open <open>
-
-ARGS:
-    <open>    The url to open
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-```
+All subcommands have their own help sections, for example:
 
 ```
 $ gogo add --help
 gogo-add 
-add url
+Add url mnemonic mapping
 
 USAGE:
     gogo add <name> <val>
