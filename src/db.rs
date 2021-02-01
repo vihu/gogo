@@ -35,7 +35,6 @@ pub fn get_browser(db: &DB) -> Option<String> {
     match db.get(&BROWSER_KEY) {
         Ok(Some(browser)) => {
             let actual_browser = String::from_utf8(browser).unwrap();
-            println!("{}{}", "browser: ".green(), actual_browser.green());
             Some(actual_browser)
         }
         Ok(None) => {

@@ -125,5 +125,8 @@ fn handle_set(db: &DB, set_matches: &ArgMatches) {
 }
 
 fn handle_get(database: &DB) {
-    db::get_browser(database).unwrap();
+    match db::get_browser(database) {
+        Some(actual_browser) => println!("{}{}", "browser: ".green(), actual_browser.green()),
+        None => ()
+    }
 }
