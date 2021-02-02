@@ -1,7 +1,7 @@
-use rocksdb::{DB, IteratorMode};
-use colored::*;
-use prettytable::{Table, row, cell};
 use crate::{BROWSER_KEY, BROWSER_VAL};
+use colored::*;
+use prettytable::{cell, row, Table};
+use rocksdb::{IteratorMode, DB};
 
 // create the database
 pub fn open(path: &str) -> DB {
@@ -53,7 +53,7 @@ pub fn get_url_from_mnemonic(db: &DB, key: &str) -> Option<String> {
     match db.get(key) {
         Ok(Some(url)) => Some(String::from_utf8(url).unwrap()),
         Ok(None) => None,
-        Err(_) => None
+        Err(_) => None,
     }
 }
 
@@ -61,19 +61,16 @@ pub fn get_url_from_mnemonic(db: &DB, key: &str) -> Option<String> {
 pub fn remove(db: &DB, key: &str) {
     match db.get(key) {
         Ok(None) => println!("{}", "key does not exist".yellow()),
-        Ok(_) => {
-            match db.delete(key) {
-                Ok(()) => {
-                    println!("{} removed", key.green());
-                    println!("{}", "Updated list".purple().bold());
-                    list_mnemonics(db)
-                }
-                Err(_) => println!("{}", "Unable to remove key".red().bold())
+        Ok(_) => match db.delete(key) {
+            Ok(()) => {
+                println!("{} removed", key.green());
+                println!("{}", "Updated list".purple().bold());
+                list_mnemonics(db)
             }
+            Err(_) => println!("{}", "Unable to remove key".red().bold()),
         },
-        Err(_) => println!("{}", "Unable to remove key".red().bold())
+        Err(_) => println!("{}", "Unable to remove key".red().bold()),
     }
-
 }
 
 // add key val pair to db
@@ -91,13 +88,11 @@ fn insert_help(key: &str, value: &str) {
 // add key/val if it does not exist already
 pub fn maybe_insert(db: &DB, key: &str, val: &str) {
     match db.get(key) {
-        Ok(None) => {
-            match db.put(key, val) {
-                Ok(()) => insert_help(key, val),
-                Err(_) => println!("{}", "Unable to remove key".red().bold())
-            }
-        }
+        Ok(None) => match db.put(key, val) {
+            Ok(()) => insert_help(key, val),
+            Err(_) => println!("{}", "Unable to remove key".red().bold()),
+        },
         Ok(_) => (),
-        Err(_) => println!("{}", "Unable to insert key".red().bold())
+        Err(_) => println!("{}", "Unable to insert key".red().bold()),
     }
 }

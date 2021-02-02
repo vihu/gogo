@@ -1,9 +1,9 @@
+use crate::{db, BROWSER_KEY};
 use clap::{App, Arg, ArgMatches};
+use colored::*;
 use rocksdb::DB;
 use std::process::Command;
 use url::Url;
-use crate::{BROWSER_KEY, db};
-use colored::*;
 
 pub fn run(db: &DB) {
     let matches = matches();
@@ -14,6 +14,7 @@ fn match_subcommand(db: &DB, matches: ArgMatches) {
     match matches.subcommand() {
         Some(("open", open_matches)) => handle_open(db, open_matches),
         Some(("add", add_matches)) => handle_add(db, add_matches),
+        Some(("search", search_matches)) => handle_search(db, search_matches),
         Some(("set_browser", set_matches)) => handle_set(db, set_matches),
         Some(("get_browser", _)) => handle_get(db),
         Some(("list", _)) => handle_list(db),
@@ -36,12 +37,14 @@ fn matches() -> ArgMatches {
             ),
         )
         .subcommand(
-            App::new("set_browser").about("Allow setting preferred browser").arg(
-                Arg::new("browser")
-                    .about("The browser to set")
-                    .takes_value(true)
-                    .required(true),
-            ),
+            App::new("set_browser")
+                .about("Allow setting preferred browser")
+                .arg(
+                    Arg::new("browser")
+                        .about("The browser to set")
+                        .takes_value(true)
+                        .required(true),
+                ),
         )
         .subcommand(
             App::new("rm").about("Remove mnemonic").arg(
@@ -69,34 +72,42 @@ fn matches() -> ArgMatches {
                         .required(true),
                 ),
         )
+        .subcommand(
+            App::new("search")
+                .about("Construct /search?q= query for known mnemonic")
+                .arg(
+                    Arg::new("mnemonic")
+                        .about("known mnemonic")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("query")
+                        .about("query to search")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        )
         .get_matches()
-}
-
-fn open_help() {
-    println!("{}", "No match found, please use add command first!".red().bold());
-    println!("{}", "gogo add name actual_url".yellow().bold())
 }
 
 fn handle_open(db: &DB, open_matches: &ArgMatches) {
     let open_val = open_matches.value_of("open").unwrap();
 
     match db::get_url_from_mnemonic(db, open_val) {
-        Some(actual_url) => {
-            match db::get_browser(db) {
-                Some(actual_browser) => {
-                    println!(
-                        "{} maps to {}, opening {}...",
-                        open_val.green(), actual_url.green(),  actual_browser.green()
-                    );
-                    Command::new(actual_browser)
-                        .arg(actual_url)
-                        .spawn()
-                        .expect("Firefox blew up");
-                }
-                None => open_help()
+        Some(actual_url) => match db::get_browser(db) {
+            Some(actual_browser) => {
+                println!(
+                    "{} maps to {}, opening {}...",
+                    open_val.green(),
+                    actual_url.green(),
+                    actual_browser.green()
+                );
+                open_browser(actual_browser, actual_url)
             }
-        }
-        None => open_help()
+            None => open_help(),
+        },
+        None => open_help(),
     }
 }
 
@@ -127,6 +138,44 @@ fn handle_set(db: &DB, set_matches: &ArgMatches) {
 fn handle_get(database: &DB) {
     match db::get_browser(database) {
         Some(actual_browser) => println!("{}{}", "browser: ".green(), actual_browser.green()),
-        None => ()
+        None => (),
     }
+}
+
+fn handle_search(db: &DB, search_matches: &ArgMatches) {
+    let mnemonic = search_matches.value_of("mnemonic").unwrap();
+    let query = search_matches.value_of("query").unwrap();
+
+    match db::get_url_from_mnemonic(db, &mnemonic) {
+        Some(actual_url) => match db::get_browser(db) {
+            Some(actual_browser) => {
+                let search_url = actual_url + "/search?q=" + query;
+                open_browser(actual_browser, search_url)
+            }
+            None => search_help(),
+        },
+        None => search_help(),
+    }
+}
+
+fn open_help() {
+    println!(
+        "{}",
+        "No match found, please use add command first!".red().bold()
+    );
+    println!("{}", "gogo add name actual_url".yellow().bold())
+}
+
+fn search_help() {
+    println!(
+        "{}",
+        "No match found, please use add command first!".red().bold()
+    )
+}
+
+fn open_browser(browser: String, url: String) {
+    Command::new(browser)
+        .arg(url)
+        .spawn()
+        .expect("Firefox blew up");
 }
