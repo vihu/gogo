@@ -1,6 +1,6 @@
 [package]
 name = "gogo"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2018"
 description = "A mnemonic terminal url opener"
@@ -19,3 +19,4 @@ rocksdb = "0.15.0"
 url = "2.2.0"
 colored = "2.0.0"
 prettytable-rs = "^0.8"
+anyhow = "1.0.38"

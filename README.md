@@ -6,7 +6,7 @@ A mnemonic terminal url opener. Also a personal minimal terminal bookmark manage
 - You can use `gogo set_browser other_browser` to change preferred browser (assuming you have other_browser  available somewhere in your path of course).
 - Backs up your bookmarks to a self contained directory which you can configure by setting `GOGODB_PATH` env variable.
 
-#### Requirments
+#### Requirements
 
 - Install [rust](https://www.rust-lang.org/tools/install) (tested with 1.46+).
 
@@ -21,20 +21,70 @@ $ cargo install gogo
 - Add `GOGODB_PATH=/path/to/gogo.db` to your bashrc/zshrc.
 - `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
 
-Some example commands you can try:
+#### Examples
 
-```
-$ gogo add github https://github.com
-$ gogo add hn https://news.ycombinator.com/
-$ gogo add reddit https://old.reddit.com
-$ gogo open github
-$ gogo open hn
-$ gogo open reddit
-$ gogo list
-$ gogo rm hn
-$ gogo set_browser librewolf
-$ gogo get_browser
-```
+- ##### Export `GOGODB_PATH` to somewhere...
+    ```
+    $ export GOGODB_PATH="/tmp/yolo2.db"
+    ```
+
+- ##### You start with no mappings...
+    ```
+    $ gogo list
+    key: _browser added, value: firefox
+    +----------+-----+
+    | Mnemonic | URL |
+    +----------+-----+
+    ```
+
+- ##### Change to a sane default browser...
+    ```
+    $ gogo set_browser librewolf
+    key: _browser added, value: librewolf
+    ```
+
+- ##### A failure case...
+    ```
+    $ gogo gh
+    No match found, please use add command first!
+    gogo add name actual_url
+    ```
+
+- ##### Add a mapping...
+    ```
+    $ gogo add gh https://github.com
+    key: gh added, value: https://github.com
+    ```
+
+- ##### Check your mappings...
+    ```
+    $ gogo list
+    +----------+--------------------+
+    | Mnemonic | URL                |
+    +----------+--------------------+
+    | gh       | https://github.com |
+    +----------+--------------------+
+    ```
+
+- ##### You can directly open once a mapping is set...
+    ```
+    $ gogo gh
+    gh maps to https://github.com, opening librewolf...
+    ```
+
+- ##### This also works...
+    ```
+    $ gogo open gh
+    gh maps to https://github.com, opening librewolf...
+    ```
+
+- ##### You can also search some specific URLs which support querying
+    ```
+    $ gogo add crates https://crates.io
+    key: crates added, value: https://crates.io
+    $ gogo search crates gogo 
+    searching crates which maps to https://crates.io for gogo...
+    ```
 
 #### Help
 
@@ -44,7 +94,10 @@ gogo 1.0
 A mnemonic url opener
 
 USAGE:
-    gogo [SUBCOMMAND]
+    gogo [mnemonic] [SUBCOMMAND]
+
+ARGS:
+    <mnemonic>    The mnemonic to open
 
 FLAGS:
     -h, --help       Prints help information
@@ -57,7 +110,9 @@ SUBCOMMANDS:
     list           List mnemonic url mapping
     open           Open url using mnemonic
     rm             Remove mnemonic
+    search         Construct /search?q= query for known mnemonic
     set_browser    Allow setting preferred browser
+
 ```
 
 All subcommands have their own help sections, for example:

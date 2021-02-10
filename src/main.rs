@@ -2,6 +2,7 @@ mod db;
 mod runner;
 use colored::*;
 use std::env;
+use anyhow::Result;
 
 // env db path key
 const ENV_DB_PATH: &str = "GOGODB_PATH";
@@ -11,7 +12,7 @@ const DEFAULT_DB_PATH: &str = "/tmp/gogo.db";
 const BROWSER_KEY: &str = "_browser";
 const BROWSER_VAL: &str = "firefox";
 
-fn main() {
+fn main() -> Result<()> {
     let db = match env::var(ENV_DB_PATH) {
         Ok(value) => db::open(value.as_str()),
         Err(_) => do_default(),
