@@ -7,6 +7,7 @@ description = "A mnemonic terminal url opener"
 homepage = "https://github.com/vihu/gogo"
 repository = "https://github.com/vihu/gogo"
 license = "MIT OR Apache-2.0"
+license-file = "LICENSE"
 readme = "README.md"
 keywords = ["cli"]
 categories = ["command-line-utilities"]
