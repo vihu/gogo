@@ -1,58 +1,55 @@
 use crate::{db, BROWSER_KEY};
+use anyhow::{anyhow, Result};
 use clap::{App, Arg, ArgMatches};
 use colored::*;
 use rocksdb::DB;
 use std::process::Command;
 use url::Url;
-use anyhow::{anyhow, Result};
 
 pub fn run(db: &DB) -> Result<()> {
     let matches = matches();
     match handle_default(db, &matches) {
         Ok(()) => Ok(()),
-        Err(_e) => {
-            match match_subcommand(db, matches) {
-                Ok(()) => Ok(()),
-                Err(_) => {
-                    default_help();
-                    Ok(())
-                }
+        Err(_e) => match match_subcommand(db, matches) {
+            Ok(()) => Ok(()),
+            Err(_) => {
+                default_help();
+                Ok(())
             }
-        }
+        },
     }
 }
 
 fn match_subcommand(db: &DB, matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
-        Some(("open", open_matches)) => handle_open(db, open_matches),
-        Some(("add", add_matches)) => handle_add(db, add_matches),
-        Some(("search", search_matches)) => handle_search(db, search_matches),
-        Some(("set_browser", set_matches)) => handle_set(db, set_matches),
-        Some(("get_browser", _)) => handle_get(db),
-        Some(("list", _)) => handle_list(db),
-        Some(("rm", rm_matches)) => handle_rm(db, rm_matches),
-        None => {
+        ("open", Some(open_matches)) => handle_open(db, open_matches),
+        ("add", Some(add_matches)) => handle_add(db, add_matches),
+        ("search", Some(search_matches)) => handle_search(db, search_matches),
+        ("set_browser", Some(set_matches)) => handle_set(db, set_matches),
+        ("get_browser", _) => handle_get(db),
+        ("list", _) => handle_list(db),
+        ("rm", Some(rm_matches)) => handle_rm(db, rm_matches),
+        _ => {
             default_help();
             Ok(())
         }
-        _ => Err(anyhow!("Nothing to do"))
     }
 }
 
-fn matches() -> ArgMatches {
+fn matches() -> ArgMatches<'static> {
     App::new("gogo")
         .about("A mnemonic url opener")
         .version("1.0")
         .arg(
-            Arg::new("mnemonic")
-            .about("The mnemonic to open")
-            .takes_value(true)
-            .required(false),
+            Arg::with_name("mnemonic")
+                .help("The mnemonic to open")
+                .takes_value(true)
+                .required(false),
         )
         .subcommand(
             App::new("open").about("Open url using mnemonic").arg(
-                Arg::new("open")
-                    .about("The url to open")
+                Arg::with_name("open")
+                    .help("The url to open")
                     .takes_value(true)
                     .required(true),
             ),
@@ -61,16 +58,16 @@ fn matches() -> ArgMatches {
             App::new("set_browser")
                 .about("Allow setting preferred browser")
                 .arg(
-                    Arg::new("browser")
-                        .about("The browser to set")
+                    Arg::with_name("browser")
+                        .help("The browser to set")
                         .takes_value(true)
                         .required(true),
                 ),
         )
         .subcommand(
             App::new("rm").about("Remove mnemonic").arg(
-                Arg::new("rm")
-                    .about("The mnemonic to remove")
+                Arg::with_name("rm")
+                    .help("The mnemonic to remove")
                     .takes_value(true)
                     .required(true),
             ),
@@ -81,14 +78,14 @@ fn matches() -> ArgMatches {
             App::new("add")
                 .about("Add url mnemonic mapping")
                 .arg(
-                    Arg::new("name")
-                        .about("url name")
+                    Arg::with_name("name")
+                        .help("url name")
                         .takes_value(true)
                         .required(true),
                 )
                 .arg(
-                    Arg::new("val")
-                        .about("url value")
+                    Arg::with_name("val")
+                        .help("url value")
                         .takes_value(true)
                         .required(true),
                 ),
@@ -97,14 +94,14 @@ fn matches() -> ArgMatches {
             App::new("search")
                 .about("Construct /search?q= query for known mnemonic")
                 .arg(
-                    Arg::new("mnemonic")
-                        .about("known mnemonic")
+                    Arg::with_name("mnemonic")
+                        .help("known mnemonic")
                         .takes_value(true)
                         .required(true),
                 )
                 .arg(
-                    Arg::new("query")
-                        .about("query to search")
+                    Arg::with_name("query")
+                        .help("query to search")
                         .takes_value(true)
                         .required(true),
                 ),
@@ -118,9 +115,7 @@ fn handle_default(db: &DB, matches: &ArgMatches) -> Result<()> {
             open(db, mnemonic);
             Ok(())
         }
-        None => {
-            Err(anyhow!("Missing default"))
-        }
+        None => Err(anyhow!("Missing default")),
     }
 }
 
@@ -187,7 +182,7 @@ fn handle_get(database: &DB) -> Result<()> {
             println!("{}{}", "browser: ".green(), actual_browser.green());
             Ok(())
         }
-        None => Ok(())
+        None => Ok(()),
     }
 }
 
@@ -231,10 +226,7 @@ fn open_help() {
 }
 
 fn default_help() {
-    println!(
-        "{}",
-        "Maybe try `gogo gh`".yellow().bold()
-    )
+    println!("{}", "Maybe try `gogo gh`".yellow().bold())
 }
 
 fn search_help() {
@@ -250,4 +242,3 @@ fn open_browser(browser: String, url: String) {
         .spawn()
         .expect("Firefox blew up");
 }
-

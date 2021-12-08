@@ -1,8 +1,8 @@
 [package]
 name = "gogo"
-version = "0.8.0"
+version = "1.0.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
-edition = "2018"
+edition = "2021"
 description = "A mnemonic terminal url opener"
 homepage = "https://github.com/vihu/gogo"
 repository = "https://github.com/vihu/gogo"
@@ -14,9 +14,9 @@ categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "3.0.0-beta.2"
-rocksdb = "0.15.0"
-url = "2.2.0"
+clap = "2.34.0"
+rocksdb = "0.17.0"
+url = "2.2.2"
 colored = "2.0.0"
-prettytable-rs = "^0.8"
-anyhow = "1.0.38"
+prettytable-rs = "0.8.0"
+anyhow = "1.0.51"
