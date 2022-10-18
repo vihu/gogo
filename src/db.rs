@@ -1,7 +1,17 @@
 use crate::{BROWSER_KEY, BROWSER_VAL};
+use anyhow::Result;
 use colored::*;
+use csv::Writer;
 use prettytable::{cell, row, Table};
 use rocksdb::{IteratorMode, DB};
+use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Record {
+    key: String,
+    val: String,
+}
 
 // create the database
 pub fn open(path: &str) -> DB {
@@ -28,6 +38,34 @@ pub fn list_mnemonics(db: &DB) {
     }
 
     table.printstd();
+}
+
+// export all mnemonic mappings
+pub fn export_mnemonics(db: &DB) -> Result<()> {
+    let iter = db.iterator(IteratorMode::Start);
+
+    let start = SystemTime::now();
+    let since_the_epoch = start.duration_since(UNIX_EPOCH)?.as_millis();
+    let fname = format!("/tmp/gogo_{:?}.csv", since_the_epoch);
+
+    let mut wtr = Writer::from_path(&fname)?;
+
+    for (key, value) in iter {
+        let human_key = String::from_utf8(key.to_vec()).unwrap();
+        if human_key != BROWSER_KEY {
+            let human_value = String::from_utf8(value.to_vec()).unwrap();
+            let record = Record {
+                key: human_key,
+                val: human_value,
+            };
+            wtr.serialize(record)?;
+        }
+    }
+    wtr.flush()?;
+
+    println!("output written to {:?}", fname);
+
+    Ok(())
 }
 
 // get set browser
