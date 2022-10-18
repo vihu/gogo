@@ -28,6 +28,7 @@ fn match_subcommand(db: &DB, matches: ArgMatches) -> Result<()> {
         ("set_browser", Some(set_matches)) => handle_set(db, set_matches),
         ("get_browser", _) => handle_get(db),
         ("list", _) => handle_list(db),
+        ("export", _) => handle_export(db),
         ("rm", Some(rm_matches)) => handle_rm(db, rm_matches),
         _ => {
             default_help();
@@ -73,6 +74,7 @@ fn matches() -> ArgMatches<'static> {
             ),
         )
         .subcommand(App::new("list").about("List mnemonic url mapping"))
+        .subcommand(App::new("export").about("Export to CSV"))
         .subcommand(App::new("get_browser").about("Get currently configured browser"))
         .subcommand(
             App::new("add")
@@ -164,6 +166,11 @@ fn handle_list(database: &DB) -> Result<()> {
     Ok(())
 }
 
+fn handle_export(database: &DB) -> Result<()> {
+    db::export_mnemonics(database)?;
+    Ok(())
+}
+
 fn handle_rm(db: &DB, rm_matches: &ArgMatches) -> Result<()> {
     let rm_val = rm_matches.value_of("rm").unwrap();
     db::remove(db, rm_val);
@@ -190,7 +197,7 @@ fn handle_search(db: &DB, search_matches: &ArgMatches) -> Result<()> {
     let mnemonic = search_matches.value_of("mnemonic").unwrap();
     let query = search_matches.value_of("query").unwrap();
 
-    match db::get_url_from_mnemonic(db, &mnemonic) {
+    match db::get_url_from_mnemonic(db, mnemonic) {
         Some(actual_url) => match db::get_browser(db) {
             Some(actual_browser) => {
                 let search_url = actual_url.clone() + "/search?q=" + query;
