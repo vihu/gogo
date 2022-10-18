@@ -18,14 +18,14 @@ $ cargo install gogo
 
 #### Usage
 
-- Add `GOGODB_PATH=/path/to/gogo.db` to your bashrc/zshrc.
+- Add `GOGODB_PATH=/path/to/gogo.sqlite` to your bashrc/zshrc.
 - `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
 
 #### Examples
 
 - ##### Export `GOGODB_PATH` to somewhere...
     ```
-    $ export GOGODB_PATH="/tmp/yolo2.db"
+    $ export GOGODB_PATH="/tmp/gogo.sqlite"
     ```
 
 - ##### You start with no mappings...

@@ -1,6 +1,6 @@
 [package]
 name = "gogo"
-version = "1.0.1"
+version = "2.0.0"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2021"
 description = "A mnemonic terminal url opener"
@@ -14,11 +14,11 @@ categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "2.34.0"
-rocksdb = "0.17.0"
-url = "2.2.2"
-colored = "2.0.0"
-prettytable-rs = "0.8.0"
-anyhow = "1.0.51"
+url = "2"
+anyhow = "1"
+rusqlite = "0"
+clap = { version = "4.0.15", features = ["derive"] }
+tabled = "0"
 csv = "1"
-serde = { version = "1", features = ["derive"] }
+serde = {version = "1", features = ["derive"]}
+serde_trim = "0"
