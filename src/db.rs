@@ -1,136 +1,70 @@
-use crate::{BROWSER_KEY, BROWSER_VAL};
 use anyhow::Result;
-use colored::*;
-use csv::Writer;
-use prettytable::{cell, row, Table};
-use rocksdb::{IteratorMode, DB};
+use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
+use serde_trim::string_trim;
+use tabled::Tabled;
 
-#[derive(Debug, Deserialize, Serialize)]
-struct Record {
-    key: String,
-    val: String,
+#[derive(Debug, Tabled, Serialize, Deserialize, Eq, PartialEq, Clone)]
+pub struct Mnemonic {
+    #[serde(deserialize_with = "string_trim")]
+    pub key: String,
+    #[serde(deserialize_with = "string_trim")]
+    pub val: String,
 }
 
-// create the database
-pub fn open(path: &str) -> DB {
-    let db = DB::open_default(path).unwrap();
-    // maybe insert default browser key/val pair if it doesn't exist
-    maybe_insert(&db, BROWSER_KEY, BROWSER_VAL);
-    db
+/// Create the database
+pub fn open(path: &str) -> Result<Connection> {
+    let conn = Connection::open(path)?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS mnemonic (
+            key TEXT PRIMARY KEY,
+            val TEXT NOT NULL
+        )",
+        (),
+    )?;
+
+    Ok(conn)
 }
 
-// list all mnemonic mappings
-pub fn list_mnemonics(db: &DB) {
-    let iter = db.iterator(IteratorMode::Start);
-
-    let mut table = Table::new();
-
-    table.add_row(row!["Mnemonic".yellow().bold(), "URL".yellow().bold()]);
-
-    for (key, value) in iter {
-        let human_key = String::from_utf8(key.to_vec()).unwrap();
-        if human_key != BROWSER_KEY {
-            let human_value = String::from_utf8(value.to_vec()).unwrap();
-            table.add_row(row![human_key.cyan(), human_value.green()]);
-        }
-    }
-
-    table.printstd();
+/// Get value from key
+pub fn get(conn: &Connection, key: &str) -> Result<String> {
+    let mut stmt = conn.prepare("SELECT val FROM mnemonic where key = ?")?;
+    let value = stmt.query_row([key], |row| row.get::<_, String>(0))?;
+    Ok(value)
 }
 
-// export all mnemonic mappings
-pub fn export_mnemonics(db: &DB) -> Result<()> {
-    let iter = db.iterator(IteratorMode::Start);
-
-    let start = SystemTime::now();
-    let since_the_epoch = start.duration_since(UNIX_EPOCH)?.as_millis();
-    let fname = format!("/tmp/gogo_{:?}.csv", since_the_epoch);
-
-    let mut wtr = Writer::from_path(&fname)?;
-
-    for (key, value) in iter {
-        let human_key = String::from_utf8(key.to_vec()).unwrap();
-        if human_key != BROWSER_KEY {
-            let human_value = String::from_utf8(value.to_vec()).unwrap();
-            let record = Record {
-                key: human_key,
-                val: human_value,
-            };
-            wtr.serialize(record)?;
-        }
-    }
-    wtr.flush()?;
-
-    println!("output written to {:?}", fname);
-
+/// Remove mnemonic => url mapping
+pub fn remove(conn: &Connection, key: &str) -> Result<()> {
+    let mut stmt = conn.prepare("DELETE FROM mnemonic WHERE key = ?")?;
+    stmt.execute([key])?;
     Ok(())
 }
 
-// get set browser
-pub fn get_browser(db: &DB) -> Option<String> {
-    match db.get(&BROWSER_KEY) {
-        Ok(Some(browser)) => {
-            let actual_browser = String::from_utf8(browser).unwrap();
-            Some(actual_browser)
+/// Add key val pair to db
+pub fn insert(conn: &Connection, key: &str, val: &str) -> Result<()> {
+    conn.execute(
+        "REPLACE INTO mnemonic (key, val) VALUES (?1, ?2)",
+        (key, val),
+    )?;
+    Ok(())
+}
+
+/// List all key-vals from db
+pub fn list_all(conn: &Connection) -> Result<Vec<Mnemonic>> {
+    let mut stmt = conn.prepare("SELECT key, val FROM mnemonic")?;
+    let mnemonic_iter = stmt.query_map([], |row| {
+        Ok(Mnemonic {
+            key: row.get(0)?,
+            val: row.get(1)?,
+        })
+    })?;
+    let mut mnemonics = vec![];
+    for mnemonic in mnemonic_iter {
+        let mnemonic = mnemonic?;
+        if mnemonic.key != "_browser" {
+            mnemonics.push(mnemonic)
         }
-        Ok(None) => {
-            println!("{}", "No browser configured".yellow().bold());
-            None
-        }
-        Err(_) => {
-            println!("{}", "Unable to get browser".red().bold());
-            None
-        }
     }
-}
-
-// get url from mnemonic
-pub fn get_url_from_mnemonic(db: &DB, key: &str) -> Option<String> {
-    match db.get(key) {
-        Ok(Some(url)) => Some(String::from_utf8(url).unwrap()),
-        Ok(None) => None,
-        Err(_) => None,
-    }
-}
-
-// remove mnemonic => url mapping
-pub fn remove(db: &DB, key: &str) {
-    match db.get(key) {
-        Ok(None) => println!("{}", "key does not exist".yellow()),
-        Ok(_) => match db.delete(key) {
-            Ok(()) => {
-                println!("{} removed", key.green());
-                println!("{}", "Updated list".purple().bold());
-                list_mnemonics(db)
-            }
-            Err(_) => println!("{}", "Unable to remove key".red().bold()),
-        },
-        Err(_) => println!("{}", "Unable to remove key".red().bold()),
-    }
-}
-
-// add key val pair to db
-pub fn insert(db: &DB, key: &str, val: &str) {
-    match db.put(key, val) {
-        Ok(_) => insert_help(key, val),
-        Err(_) => insert_help(key, val),
-    }
-}
-
-fn insert_help(key: &str, value: &str) {
-    println!("key: {} added, value: {}", key.green(), value.green())
-}
-
-// add key/val if it does not exist already
-pub fn maybe_insert(db: &DB, key: &str, val: &str) {
-    match db.get(key) {
-        Ok(None) => match db.put(key, val) {
-            Ok(()) => insert_help(key, val),
-            Err(_) => println!("{}", "Unable to remove key".red().bold()),
-        },
-        Ok(_) => (),
-        Err(_) => println!("{}", "Unable to insert key".red().bold()),
-    }
+    Ok(mnemonics)
 }
