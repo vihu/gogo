@@ -1,0 +1,51 @@
+name: gogo
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+          override: true
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ runner.os }}-checkout
+
+      - name: Check
+        run: cargo check --release
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ runner.os }}-check
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ runner.os }}-fmt
+
+      - name: Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -Dclippy::all
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ runner.os }}-clippy
+
+      - name: Run tests
+        run: cargo test --release
+      - uses: Swatinem/rust-cache@v1
+        with:
+          key: ${{ runner.os }}-test

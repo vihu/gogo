@@ -43,10 +43,8 @@ pub fn remove(conn: &Connection, key: &str) -> Result<()> {
 
 /// Add key val pair to db
 pub fn insert(conn: &Connection, key: &str, val: &str) -> Result<()> {
-    conn.execute(
-        "REPLACE INTO mnemonic (key, val) VALUES (?1, ?2)",
-        (key, val),
-    )?;
+    let mut stmt = conn.prepare("REPLACE INTO mnemonic (key, val) VALUES (?1, ?2)")?;
+    stmt.execute([key, val])?;
     Ok(())
 }
 
@@ -67,4 +65,22 @@ pub fn list_all(conn: &Connection) -> Result<Vec<Mnemonic>> {
         }
     }
     Ok(mnemonics)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn basic() {
+        let test_db_path = "/tmp/gogotest.db";
+        let conn = open(test_db_path).expect("failed to create gogotest database");
+        insert(&conn, "key", "value").expect("unable to insert key:val");
+        insert(&conn, "key2", "value2").expect("unable to insert key:val");
+        let val = get(&conn, "key").expect("unable to get value");
+        assert_eq!("value", val);
+        let mnemonics = list_all(&conn).expect("unable to list mnemonics");
+        assert!(mnemonics.len() == 2);
+        std::fs::remove_file(test_db_path).expect("unable to clean up gogotest database");
+    }
 }

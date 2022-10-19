@@ -1,135 +1,116 @@
-#### gogo
+# gogo
 
-A mnemonic terminal url opener. Also a personal minimal terminal bookmark manager.
+A mnemonic terminal url opener. Also a personal minimal terminal bookmark
+manager.
 
-- Will use firefox as the default browser for opening links.
-- You can use `gogo set_browser other_browser` to change preferred browser (assuming you have other_browser  available somewhere in your path of course).
-- Backs up your bookmarks to a self contained directory which you can configure by setting `GOGODB_PATH` env variable.
+If you live mostly in the terminal and want quick access to some of your most
+frequently visited websites, this little tool can help you achieve that.
+
+An example scenario:
+
+1. I often visit `https://crates.io`.
+2. I often search for a crate on crates.io.
+
+To do so in the terminal, I run **once** ```gogo add cr https://crates.io```.
+This allows me to do:
+
+```shell
+$ gogo cr
+opening: "https://crates.io"
+```
+
+Some websites support `/search?q={query}`, for those you can also do:
+```shell
+$ gogo search cr serde
+opening: "https://crates.io/search?q=serde"
+```
 
 #### Requirements
 
 - Install [rust](https://www.rust-lang.org/tools/install) (tested with 1.46+).
+- Export `GOGODB_PATH` env var to something like: `/path/to/gogo.sqlite`.
+- Supply a browser executable with `gogo set_browser /path/to/browser`.
+
+PS: For MacOS browser, try this (Firefox as an example):
+```shell
+$ gogo set_browser /Applications/Firefox.app/Contents/MacOS/firefox-bin
+```
 
 #### Installation
 
-```
+```shell
 $ cargo install gogo
 ```
 
-#### Usage
+#### Tips
 
-- Add `GOGODB_PATH=/path/to/gogo.sqlite` to your bashrc/zshrc.
-- `URL` value must be parseable according to [URL standard](https://url.spec.whatwg.org/).
+- `gogo ls` will print an ascii table:
 
-#### Examples
+```shell
+$ gogo ls
++-----------+--------------------+
+| key       | val                |
++-----------+--------------------+
+| cr        | https://crates.io  |
++-----------+--------------------+
+```
 
-- ##### Export `GOGODB_PATH` to somewhere...
-    ```
-    $ export GOGODB_PATH="/tmp/gogo.sqlite"
-    ```
+- `gogo check` will print the url for mnemonic:
 
-- ##### You start with no mappings...
-    ```
-    $ gogo list
-    key: _browser added, value: firefox
-    +----------+-----+
-    | Mnemonic | URL |
-    +----------+-----+
-    ```
+```shell
+$ gogo check cr
+value: "https://crates.io"
+```
 
-- ##### Change to a sane default browser...
-    ```
-    $ gogo set_browser librewolf
-    key: _browser added, value: librewolf
-    ```
+- `gogo import /path/to/exported_csv` and `gogo export` work as expected and
+  output a CSV file.
 
-- ##### A failure case...
-    ```
-    $ gogo gh
-    No match found, please use add command first!
-    gogo add name actual_url
-    ```
-
-- ##### Add a mapping...
-    ```
-    $ gogo add gh https://github.com
-    key: gh added, value: https://github.com
-    ```
-
-- ##### Check your mappings...
-    ```
-    $ gogo list
-    +----------+--------------------+
-    | Mnemonic | URL                |
-    +----------+--------------------+
-    | gh       | https://github.com |
-    +----------+--------------------+
-    ```
-
-- ##### You can directly open once a mapping is set...
-    ```
-    $ gogo gh
-    gh maps to https://github.com, opening librewolf...
-    ```
-
-- ##### This also works...
-    ```
-    $ gogo open gh
-    gh maps to https://github.com, opening librewolf...
-    ```
-
-- ##### You can also search some specific URLs which support querying
-    ```
-    $ gogo add crates https://crates.io
-    key: crates added, value: https://crates.io
-    $ gogo search crates gogo 
-    searching crates which maps to https://crates.io for gogo...
-    ```
+- If you switch systems, just satisfy the requirements and copy over your
+  `gogo.sqlite` db to your new machine.
 
 #### Help
 
-```
+The help is self documenting:
+
+```shell
 $ gogo --help
-gogo 1.0
 A mnemonic url opener
 
-USAGE:
-    gogo [mnemonic] [SUBCOMMAND]
+Usage: gogo [mnemonic] [COMMAND]
 
-ARGS:
-    <mnemonic>    The mnemonic to open
+Commands:
+  open         Open url using mnemonic
+  set_browser  Allow setting preferred browser
+  rm           Remove mnemonic
+  check        Check mnemonic
+  import       Import CSV
+  ls           List mnemonic url mapping
+  get_browser  Get currently configured browser
+  export       Export database to CSV
+  search       Construct /search?q= query for known mnemonic
+  add          Add url mnemonic mapping
+  help         Print this message or the help of the given subcommand(s)
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+Arguments:
+  [mnemonic]  The mnemonic to open
 
-SUBCOMMANDS:
-    add            Add url mnemonic mapping
-    get_browser    Get currently configured browser
-    help           Prints this message or the help of the given subcommand(s)
-    list           List mnemonic url mapping
-    open           Open url using mnemonic
-    rm             Remove mnemonic
-    search         Construct /search?q= query for known mnemonic
-    set_browser    Allow setting preferred browser
-
+Options:
+  -h, --help     Print help information
+  -V, --version  Print version information
 ```
 
 All subcommands have their own help sections, for example:
 
-```
+```shell
 $ gogo add --help
-gogo-add 
 Add url mnemonic mapping
 
-USAGE:
-    gogo add <name> <val>
+Usage: gogo add <name> <val>
 
-ARGS:
-    <name>    url name
-    <val>     url value
+Arguments:
+  <name>  url name
+  <val>   url value
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+Options:
+  -h, --help  Print help information
 ```

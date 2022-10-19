@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [2.0.1](https://github.com/vihu/gogo/releases/tag/v2.0.1) - 2022-10-19
+
+### Added
+
+- Clarify README.
+- Add a basic test.
+- Add github workflow.
+- Update import/export commands to use supplied CSV file path.
+- Fix version for `gogo` executable.
+
+### Fixes
+
+- Fixes [#7](https://github.com/vihu/gogo/issues/7).
+
 ## [2.0.0](https://github.com/vihu/gogo/releases/tag/v2.0.0) - 2022-10-18
 
 ### Breaking Changes
