@@ -3,10 +3,7 @@ use anyhow::{anyhow, Context, Result};
 use clap::{Arg, ArgMatches, Command};
 use csv::{Reader, Writer};
 use rusqlite::Connection;
-use std::{
-    process,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::{path::Path, process};
 use tabled::Table;
 use url::Url;
 
@@ -48,8 +45,8 @@ fn handle_add(conn: &Connection, add_matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
-fn handle_import_csv(conn: &Connection, csv_matches: &ArgMatches) -> Result<()> {
-    if let Some(csv_path) = csv_matches.get_one::<String>("csv") {
+fn handle_import_csv(conn: &Connection, import_matches: &ArgMatches) -> Result<()> {
+    if let Some(csv_path) = import_matches.get_one::<String>("import_path") {
         let mut rdr = Reader::from_path(csv_path)?;
         for result in rdr.deserialize() {
             let record: db::Mnemonic = result?;
@@ -59,16 +56,16 @@ fn handle_import_csv(conn: &Connection, csv_matches: &ArgMatches) -> Result<()> 
     Ok(())
 }
 
-fn handle_export_csv(conn: &Connection) -> Result<()> {
-    let start = SystemTime::now();
-    let since_the_epoch = start.duration_since(UNIX_EPOCH)?.as_millis();
-    let fname = format!("/tmp/gogo_{:?}.csv", since_the_epoch);
-    let mut wtr = Writer::from_path(&fname)?;
-    let mnemonics = db::list_all(conn)?;
-    for mnemonic in mnemonics {
-        wtr.serialize(mnemonic)?;
+fn handle_export_csv(conn: &Connection, export_matches: &ArgMatches) -> Result<()> {
+    if let Some(csv_path) = export_matches.get_one::<String>("export_path") {
+        let fpath = Path::new(csv_path);
+        let mut wtr = Writer::from_path(&fpath)?;
+        let mnemonics = db::list_all(conn)?;
+        for mnemonic in mnemonics {
+            wtr.serialize(mnemonic)?;
+        }
+        println!("Output written to: {:?}", fpath);
     }
-    println!("Output written to: {:?}", fname);
     Ok(())
 }
 
@@ -155,8 +152,8 @@ fn match_subcommand(conn: &Connection, matches: ArgMatches) -> Result<()> {
         Some(("search", search_matches)) => handle_search(conn, search_matches),
         Some(("set_browser", set_matches)) => handle_set_browser(conn, set_matches),
         Some(("get_browser", _)) => handle_get_browser(conn),
-        Some(("import", csv_matches)) => handle_import_csv(conn, csv_matches),
-        Some(("export", _)) => handle_export_csv(conn),
+        Some(("import", import_matches)) => handle_import_csv(conn, import_matches),
+        Some(("export", export_matches)) => handle_export_csv(conn, export_matches),
         _ => Err(anyhow!("Unsupported argument!")),
     }
 }
@@ -164,7 +161,7 @@ fn match_subcommand(conn: &Connection, matches: ArgMatches) -> Result<()> {
 fn matches() -> ArgMatches {
     Command::new("gogo")
         .about("A mnemonic url opener")
-        .version("1.0")
+        .version("2.0.1")
         .arg(
             Arg::new("mnemonic")
                 .help("The mnemonic to open")
@@ -197,13 +194,21 @@ fn matches() -> ArgMatches {
             ),
         )
         .subcommand(
-            Command::new("import")
-                .about("Import CSV")
-                .arg(Arg::new("csv").help("The CSV to import").required(true)),
+            Command::new("import").about("Import CSV").arg(
+                Arg::new("import_path")
+                    .help("The CSV to import")
+                    .required(true),
+            ),
+        )
+        .subcommand(
+            Command::new("export").about("Export CSV").arg(
+                Arg::new("export_path")
+                    .help("The CSV to export. Example gogo export output.csv")
+                    .required(true),
+            ),
         )
         .subcommand(Command::new("ls").about("List mnemonic url mapping"))
         .subcommand(Command::new("get_browser").about("Get currently configured browser"))
-        .subcommand(Command::new("export").about("Export database to CSV"))
         .subcommand(
             Command::new("search")
                 .about("Construct /search?q= query for known mnemonic")

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [2.0.1](https://github.com/vihu/gogo/releases/tag/v2.0.1) - 2022-10-18
+
+### Added
+
+- Clarify README.
+- Add a basic test.
+- Fix version for `gogo` executable.
+
 ## [2.0.0](https://github.com/vihu/gogo/releases/tag/v2.0.0) - 2022-10-18
 
 ### Breaking Changes
