@@ -106,7 +106,7 @@ pub fn migrate(conn: &Connection) -> Result<()> {
                     remove_file(db_path)?;
                     println!("removing old db {:?}", db_path);
                     println!("creating new empty database {:?}", db_str);
-                    let new_conn = open_v2(db_str)?;
+                    let new_conn = open_v2(db_path)?;
                     println!("populating new database {:?}", db_str);
                     populate_v2(&Connection::open(backup_path)?, &new_conn)?;
                     println!("removing tmp database {:?}", backup_path);
