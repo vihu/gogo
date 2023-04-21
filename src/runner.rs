@@ -59,7 +59,7 @@ fn handle_import_csv(conn: &Connection, import_matches: &ArgMatches) -> Result<(
 fn handle_export_csv(conn: &Connection, export_matches: &ArgMatches) -> Result<()> {
     if let Some(csv_path) = export_matches.get_one::<String>("export_path") {
         let fpath = Path::new(csv_path);
-        let mut wtr = Writer::from_path(&fpath)?;
+        let mut wtr = Writer::from_path(fpath)?;
         let mnemonics = db::list_all(conn)?;
         for mnemonic in mnemonics {
             wtr.serialize(mnemonic)?;
@@ -142,6 +142,13 @@ fn handle_open(conn: &Connection, open_matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
+/// migrate db to new version
+fn handle_migrate(conn: &Connection, _migrate_matches: &ArgMatches) -> Result<()> {
+    db::migrate(conn)?;
+    println!("db successfully migrated!");
+    Ok(())
+}
+
 fn match_subcommand(conn: &Connection, matches: ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("add", add_matches)) => handle_add(conn, add_matches),
@@ -154,6 +161,7 @@ fn match_subcommand(conn: &Connection, matches: ArgMatches) -> Result<()> {
         Some(("get_browser", _)) => handle_get_browser(conn),
         Some(("import", import_matches)) => handle_import_csv(conn, import_matches),
         Some(("export", export_matches)) => handle_export_csv(conn, export_matches),
+        Some(("migrate", migrate_matches)) => handle_migrate(conn, migrate_matches),
         _ => Err(anyhow!("Unsupported argument!")),
     }
 }
@@ -220,6 +228,9 @@ fn matches() -> ArgMatches {
                 .about("Add url mnemonic mapping")
                 .arg(Arg::new("name").help("url name").required(true))
                 .arg(Arg::new("val").help("url value").required(true)),
+        )
+        .subcommand(
+            Command::new("migrate").about("Migrate sqlite database in-place to v2 (with id)"),
         )
         .get_matches()
 }
