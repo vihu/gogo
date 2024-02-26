@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2.0.5](https://github.com/vihu/gogo/releases/tag/v2.0.5) - 2024-02-25
+
+### Removed
+
+- Failing windows binary
+
 ## [2.0.4](https://github.com/vihu/gogo/releases/tag/v2.0.4) - 2024-02-25
 
 ### Added
