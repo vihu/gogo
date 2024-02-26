@@ -1,5 +1,7 @@
 # gogo
 
+![build](https://github.com/vihu/gogo/actions/workflows/rust.yml/badge.svg) ![release](https://github.com/vihu/gogo/actions/workflows/release.yml/badge.svg)
+
 A mnemonic terminal url opener. Also a personal minimal terminal bookmark
 manager.
 
@@ -11,7 +13,7 @@ An example scenario:
 1. I often visit `https://crates.io`.
 2. I often search for a crate on crates.io.
 
-To do so in the terminal, I run **once** ```gogo add cr https://crates.io```.
+To do so in the terminal, I run **once** `gogo add cr https://crates.io`.
 This allows me to do:
 
 ```shell
@@ -20,6 +22,7 @@ opening: "https://crates.io"
 ```
 
 Some websites support `/search?q={query}`, for those you can also do:
+
 ```shell
 $ gogo search cr serde
 opening: "https://crates.io/search?q=serde"
@@ -32,6 +35,7 @@ opening: "https://crates.io/search?q=serde"
 - Supply a browser executable with `gogo set_browser /path/to/browser`.
 
 PS: For MacOS browser, try this (Firefox as an example):
+
 ```shell
 $ gogo set_browser /Applications/Firefox.app/Contents/MacOS/firefox-bin
 ```

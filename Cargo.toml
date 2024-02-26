@@ -1,6 +1,6 @@
 [package]
 name = "gogo"
-version = "2.0.3"
+version = "2.0.4"
 authors = ["Rahul Garg <rg@vihu.dev>"]
 edition = "2021"
 description = "A mnemonic terminal url opener"
@@ -21,4 +21,22 @@ clap = { version = "4.0.15", features = ["derive"] }
 tabled = "0"
 csv = "1"
 serde = {version = "1", features = ["derive"]}
-serde_trim = "0"
+serde_trim = "1"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.11.1"
+# CI backends to support
+ci = ["github"]
+# The installers to generate for each app
+installers = []
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"

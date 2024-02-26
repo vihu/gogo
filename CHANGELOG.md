@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [2.0.4](https://github.com/vihu/gogo/releases/tag/v2.0.4) - 2024-02-25
+
+### Added
+
+- Bump version
+- Update `serde-trim` dependency
+- Use [cargo-dist](https://github.com/axodotdev/cargo-dist) for release management
+
 ## [2.0.1](https://github.com/vihu/gogo/releases/tag/v2.0.1) - 2022-10-19
 
 ### Added
@@ -21,7 +29,7 @@
 - **NOTE** `v2.0.0` switches backend from rocksdb to sqlite. It is backward
   incompatible with any `v1.0.*`.
 
-### Migrating from v1.0.* -> v2.0.0
+### Migrating from v1.0.\* -> v2.0.0
 
 - Ensure you are using `v1.0.1`.
 - Run `gogo export`, take note of the `output_ts.csv` file.
